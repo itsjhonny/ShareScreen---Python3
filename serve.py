@@ -1,10 +1,11 @@
 import socket
 from zlib import decompress
-
+import os
 import pygame
+from pygame.locals import *
 
-WIDTH = 1900
-HEIGHT = 1000
+WIDTH = 1366
+HEIGHT = 768
 
 
 def recvall(conn, length):
@@ -19,18 +20,18 @@ def recvall(conn, length):
     return buf
 
 
-def main(host='127.0.0.1', port=5000):
+def main(host='10.1.50.201', port=5000):
     pygame.init()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    screen = pygame.display.set_mode((800,600),HWSURFACE|DOUBLEBUF|RESIZABLE)
     clock = pygame.time.Clock()
-    watching = True    
+    watching = True
+    changed = False    
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     orig = (host, port)
     sock.bind(orig)
     sock.listen(1)
-   
-    
+       
     while 'connected':
         conn, cliente = sock.accept()
         print ('Concetado por', cliente)
@@ -39,8 +40,11 @@ def main(host='127.0.0.1', port=5000):
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         watching = False
-                        break
-                
+                        break 
+                    elif event.type == pygame.VIDEORESIZE:
+                        print("screen rezise")
+                        screen=pygame.display.set_mode(event.dict['size'],HWSURFACE|DOUBLEBUF|RESIZABLE)
+                        changed = True               
 
                 # Retreive the size of the pixels length, the pixels length and pixels
                 size_len = int.from_bytes(conn.recv(1), byteorder='big')
